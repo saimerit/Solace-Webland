@@ -505,9 +505,6 @@ const App: FC = () => {
                                 <p className="hero-subtitle">Solace is a safe sanctuary on your phone for quiet, tough moments. The friend you can turn to at 3 AM, without judgment.</p>
                             </AnimatedElement>
                             <AnimatedElement>
-                                <a href="#download" className="cta-button hero-cta">Download the App</a>
-                            </AnimatedElement>
-                            <AnimatedElement>
                                 <p className="hero-subtext">Available for Android.</p>
                             </AnimatedElement>
                         </div>
@@ -597,7 +594,7 @@ const App: FC = () => {
                                 <p className="section-subtitle">Your personal, private companion is ready when you are. Download the app to create your own safe space.</p>
                             </AnimatedElement>
                             <AnimatedElement>
-                                <a href="#" className="cta-button hero-cta">Download for Free</a>
+                                <a href="https://github.com/Aerodia/Solace-App-Release/releases/download/v1.0.1/Solace-v1.0.apk" className="cta-button hero-cta">Download for Free</a>
                             </AnimatedElement>
                             <AnimatedElement>
                                 <p className="hero-subtext">For Android devices.</p>
