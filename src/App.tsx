@@ -389,6 +389,7 @@ const AppStyles = () => (
         display: flex;
         flex-direction: column;
         align-items: center;
+        text-align: center;
         gap: 1rem;
     }
     .footer-links {
@@ -412,6 +413,21 @@ const AppStyles = () => (
     }
     .footer .logo {
         color: var(--text-light);
+    }
+    .footer-credits {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.7);
+        text-align: center;
+        margin-top: 1rem;
+    }
+
+    .footer-credits a {
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: underline;
+    }
+
+    .footer-credits a:hover {
+        color: var(--light-accent);
     }
     
     @media (min-width: 640px) {
@@ -722,8 +738,13 @@ const App: FC = () => {
                             <div className="footer-links">
                                 <p>&copy; 2025 Solace. All rights reserved.</p>
                                 <div className="footer-links-group">
-                                   <a href="#">Privacy Policy</a>
-                                   <a href="#">Terms of Service</a>
+                                <a href="#">Privacy Policy</a>
+                                <a href="#">Terms of Service</a>
+                                </div>
+                                <div className="footer-credits">
+                                    <p>Background video by <a href="https://motionbgs.com" target="_blank" rel="noopener noreferrer">Motion BGS</a></p>
+                                    <p>Website by <a href="https://github.com/saimerit" target="_blank" rel="noopener noreferrer">saimerit</a></p>
+                                    <p>App by <a href="https://github.com/Aerodia" target="_blank" rel="noopener noreferrer">Aerodia</a></p>
                                 </div>
                             </div>
                         </div>
