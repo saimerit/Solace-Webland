@@ -1,11 +1,32 @@
 import { useState, useEffect, useRef } from 'react';
-import type { FC, ReactNode } from 'react';
+import type { FC, ReactNode, FormEvent } from 'react';
+
+// --- EmailJS Declaration ---
+// This makes the emailjs object available in our component
+declare global {
+    interface Window {
+        emailjs: {
+            // FIX: Replaced Promise<any> with the specific type
+            sendForm: (serviceID: string, templateID: string, form: HTMLFormElement) => Promise<EmailJSResponse>;
+        };
+    }
+}
+
+// Define specific types for the EmailJS response
+interface EmailJSResponse {
+    status: number;
+    text: string;
+}
+
+interface EmailJSError {
+    text: string;
+}
+
 
 // --- CSS Styles Component ---
-// All styles are self-contained here, replacing Tailwind CSS.
 const AppStyles = () => (
   <style>{`
-    /* --- VARIABLES & BASE STYLES --- */
+    /* --- ALL YOUR EXISTING STYLES... --- */
     :root {
       --app-height: 100vh; 
       --light-accent: #e58c97;
@@ -15,7 +36,6 @@ const AppStyles = () => (
       --text-light: #fdf8f5;
     }
 
-    /* --- GLOBAL RESET & BASE --- */
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
@@ -30,12 +50,11 @@ const AppStyles = () => (
       font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      background-color: #0a0a0a; /* Dark fallback color */
+      background-color: #0a0a0a;
       color: var(--text-dark);
       line-height: 1.6;
     }
 
-    /* --- MAIN APP CONTAINER --- */
     .app-container {
       height: var(--app-height);
       width: 100%;
@@ -58,7 +77,6 @@ const AppStyles = () => (
         scroll-behavior: smooth;
     }
 
-    /* --- ANIMATION --- */
     .animated-element {
       transition: opacity 0.7s ease-out, transform 0.7s ease-out;
       opacity: 0;
@@ -69,7 +87,6 @@ const AppStyles = () => (
       transform: translateY(0);
     }
 
-    /* --- HEADER --- */
     .header {
       position: fixed;
       top: 0;
@@ -128,7 +145,6 @@ const AppStyles = () => (
         text-decoration: none;
     }
     
-    /* --- BUTTONS --- */
     .cta-button {
       background-color: var(--light-accent);
       color: white;
@@ -142,7 +158,6 @@ const AppStyles = () => (
       background-color: var(--light-accent-hover);
     }
     
-    /* --- SECTIONS --- */
     .section {
         width: 100%;
         min-height: 90vh;
@@ -152,7 +167,7 @@ const AppStyles = () => (
         padding: 5rem 1.5rem;
     }
     #hero {
-        min-height: 100%; /* vh can be tricky, 100% of parent is more reliable */
+        min-height: 100%;
     }
     .section-content {
         max-width: 1100px;
@@ -162,7 +177,6 @@ const AppStyles = () => (
         text-shadow: 0 2px 8px rgba(0,0,0,0.7);
     }
 
-    /* --- CONTENT PANELS (for Features & FAQ) --- */
     .content-panel {
         background-color: rgba(0, 0, 0, 0.25);
         backdrop-filter: blur(10px);
@@ -171,7 +185,6 @@ const AppStyles = () => (
         border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* --- HERO-SPECIFIC STYLES --- */
     .hero-title {
         font-size: clamp(2.5rem, 5vw, 4rem);
         font-weight: 800;
@@ -197,7 +210,6 @@ const AppStyles = () => (
         color: rgba(255, 255, 255, 0.9);
     }
 
-    /* --- SHARED HEADER --- */
     .section-header {
         margin-bottom: 3rem;
     }
@@ -212,7 +224,6 @@ const AppStyles = () => (
         color: rgba(255, 255, 255, 0.9);
     }
 
-    /* --- FEATURES GRID --- */
     .features-grid {
         display: grid;
         gap: 2rem;
@@ -251,7 +262,6 @@ const AppStyles = () => (
         color: rgba(255,255,255,0.8);
     }
 
-    /* --- PRINCIPLES GRID --- */
     .principles-grid {
         display: grid;
         gap: 2rem;
@@ -265,7 +275,6 @@ const AppStyles = () => (
         color: rgba(255,255,255,0.9);
     }
 
-    /* --- FAQ --- */
     .faq-list {
         display: flex;
         flex-direction: column;
@@ -313,8 +322,61 @@ const AppStyles = () => (
         padding: 0 1rem 1rem;
         color: rgba(255,255,255,0.8);
     }
-
-    /* --- FOOTER --- */
+    
+    /* --- NEW CONTACT FORM STYLES --- */
+    .contact-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        max-width: 600px;
+        margin: 0 auto;
+        text-align: left;
+    }
+    .contact-form label {
+        font-weight: 600;
+        color: var(--text-light);
+        text-shadow: none;
+    }
+    .contact-form input,
+    .contact-form textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background-color: rgba(0, 0, 0, 0.3);
+        color: var(--text-light);
+        font-family: inherit;
+    }
+    .contact-form input:focus,
+    .contact-form textarea:focus {
+        outline: none;
+        border-color: var(--light-accent);
+    }
+    .contact-form button {
+        background-color: var(--light-accent);
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+    .contact-form button:hover {
+        background-color: var(--light-accent-hover);
+    }
+    .status-message {
+        margin-top: 1rem;
+        text-align: center;
+        font-weight: 600;
+    }
+    .status-message.success {
+        color: #4ade80; /* A green color */
+    }
+    .status-message.error {
+        color: #f87171; /* A red color */
+    }
+    
     .footer {
         width: 100%;
         color: rgba(255,255,255,0.9);
@@ -352,7 +414,6 @@ const AppStyles = () => (
         color: var(--text-light);
     }
     
-    /* --- RESPONSIVE MEDIA QUERIES --- */
     @media (min-width: 640px) {
         .content-panel {
             padding: 2.5rem;
@@ -423,6 +484,7 @@ const Header: FC = () => {
                     <a href="#features" onClick={closeMenu}>Our Tools</a>
                     <a href="#principles" onClick={closeMenu}>Our Principles</a>
                     <a href="#faq" onClick={closeMenu}>FAQ</a>
+                    <a href="#contact" onClick={closeMenu}>Contact Us</a> 
                     <a href="#download" onClick={closeMenu} className="cta-button">Download</a>
                 </nav>
                 <button className="mobile-menu-button" onClick={() => setIsMenuOpen(!isMenuOpen)}>
@@ -434,6 +496,7 @@ const Header: FC = () => {
                     <a href="#features" onClick={closeMenu}>Our Tools</a>
                     <a href="#principles" onClick={closeMenu}>Our Principles</a>
                     <a href="#faq" onClick={closeMenu}>FAQ</a>
+                    <a href="#contact" onClick={closeMenu}>Contact Us</a>
                     <a href="#download" onClick={closeMenu} className="cta-button" style={{width: '100%', textAlign: 'center', display: 'block'}}>Download</a>
                 </div>
             )}
@@ -462,6 +525,55 @@ const FAQItem: FC<FAQItemProps> = ({ question, children }) => {
         </AnimatedElement>
     );
 };
+
+// --- Contact Us Component ---
+const ContactUs: FC = () => {
+    const form = useRef<HTMLFormElement>(null);
+    const [status, setStatus] = useState({ message: '', type: '' });
+
+    const sendEmail = (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        if (form.current) {
+            setStatus({ message: 'Sending...', type: '' });
+            window.emailjs.sendForm('service_oq9r7qo', 'template_hpqyfly', form.current)
+                .then((result: EmailJSResponse) => {
+                    console.log(result.text);
+                    setStatus({ message: 'Feedback sent successfully!', type: 'success' });
+                    form.current?.reset();
+                }, (error: EmailJSError) => {
+                    console.log(error.text);
+                    setStatus({ message: 'Failed to send feedback. Please try again.', type: 'error' });
+                });
+        }
+    };
+
+    return (
+        <section id="contact" className="section">
+            <div className="section-content content-panel">
+                <AnimatedElement className="section-header">
+                    <h2 className="section-title">Get In Touch</h2>
+                    <p className="section-subtitle">Have questions or feedback? We'd love to hear from you.</p>
+                </AnimatedElement>
+                <AnimatedElement>
+                    <form ref={form} onSubmit={sendEmail} className="contact-form">
+                        <label>Name</label>
+                        <input type="text" name="from_name" required />
+                        <label>Email</label>
+                        <input type="email" name="from_email" required />
+                        <label>Message</label>
+                        <textarea name="message" rows={5} required />
+                        <button type="submit">Send Message</button>
+                    </form>
+                    {status.message && (
+                        <p className={`status-message ${status.type}`}>{status.message}</p>
+                    )}
+                </AnimatedElement>
+            </div>
+        </section>
+    );
+};
+
 
 // --- Video Background Component ---
 const VideoBackground: FC = () => (
@@ -584,7 +696,9 @@ const App: FC = () => {
                             </div>
                         </div>
                     </section>
-                    
+
+                    <ContactUs /> 
+
                     <section id="download" className="section">
                         <div className="section-content">
                             <AnimatedElement>
@@ -622,4 +736,3 @@ const App: FC = () => {
 };
 
 export default App;
-
